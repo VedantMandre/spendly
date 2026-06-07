@@ -1,43 +1,117 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project overview
 
-This is a teaching/learning project: a personal expense-tracking web app ("Spendly") built with Flask. Many routes and modules are intentionally left as stubs with comments like "Students will implement these" / "Students will write this file in Step N" — the codebase is structured as a step-by-step build-out, so don't be surprised by placeholder routes that just return a string (e.g. `/logout`, `/profile`, `/expenses/add`).
+Spendly is a lightweight personal expense tracker built with Flask and SQLite.
 
-## Commands
-
-Run the dev server (from the project root, with the virtualenv active):
-```
-python app.py
-```
-The app runs on `http://localhost:5001` with `debug=True`.
-
-Install dependencies:
-```
-pip install -r requirements.txt
-```
-
-Run tests (pytest + pytest-flask are in requirements.txt, though no test files exist yet):
-```
-pytest
-```
+---
 
 ## Architecture
+```
+spendly/
+├── app.py              # All routes — single file, no blueprints
+├── database/
+│   └── db.py           # SQLite helpers: get_db(), init_db(), seed_db()
+├── templates/
+│   ├── base.html       # Shared layout — all templates must extend this
+│   └── *.html          # One template per page
+├── static/
+│   ├── css/
+│   │   ├── style.css       # Global styles
+│   │   └── landing.css     # Landing-page-only styles
+│   └── js/
+│       └── main.js         # Vanilla JS only
+└── requirements.txt
+```
 
-- **`app.py`** — single-file Flask application; all routes are defined here with `@app.route()` and rendered via `render_template()`. There is no blueprint structure — new routes go directly in this file.
-- **`database/db.py`** — intended to hold `get_db()` (SQLite connection with `row_factory` and foreign keys enabled), `init_db()` (creates tables with `CREATE TABLE IF NOT EXISTS`), and `seed_db()` (sample data for dev). Currently a stub — not yet implemented.
-- **`templates/`** — Jinja2 templates. `base.html` is the shared layout (nav, footer, `{% block title/head/content/scripts %}`); all pages `{% extends "base.html" %}`. Use `url_for()` for all internal links and static assets.
-- **`static/css/style.css`** — the single, consolidated stylesheet for the entire site (there is intentionally no per-page CSS file — a previous `landing.css` was merged into this file). It defines the design system as CSS custom properties on `:root`:
-  - Colors: `--ink`, `--ink-soft`, `--ink-muted`, `--ink-faint`, `--paper`, `--paper-warm`, `--paper-card`, `--accent` (#1a472a green), `--accent-light`, `--accent-2`, `--danger`, `--border`, `--border-soft`
-  - Typography: `--font-display` (DM Serif Display, for headings), `--font-body` (DM Sans, for body text)
-  - Layout: `--max-width` (1200px), `--radius-sm/md/lg`
-  - When styling new pages/components, reuse these variables rather than hardcoding colors or introducing a new stylesheet.
-- **`static/js/main.js`** — shared vanilla JS (currently empty/stub). The project uses **no JS frameworks or libraries** — all interactivity (e.g. the landing page's video modal) is plain vanilla JS, typically as an IIFE in a page's `{% block scripts %}`.
+**Where things belong:**
+- New routes → `app.py` only, no blueprints
+- DB logic → `database/db.py` only, never inline in routes
+- New pages → new `.html` file extending `base.html`
+- Page-specific styles → new `.css` file, not inline `<style>` tags
 
-## Conventions observed in the codebase
+---
 
-- Plain-text/legal pages (Terms, Privacy) use a shared `.prose-page` / `.prose-header` / `.prose-title` / `.prose-meta` / `.prose-body` class structure in `style.css` for consistent typography — follow this pattern for any new text-heavy pages rather than writing inline styles.
-- The landing page hero and mockup card use an `lp-` prefixed class namespace (`lp-hero`, `lp-badge`, `lp-mockup`, `lp-stat-card`, etc.) kept distinct from other shared classes like `.hero`/`.mock-card`.
-- Modal/overlay UI (see the landing page's video modal) follows a vanilla-JS pattern: toggle an `is-open` class plus `aria-hidden`, support closing via close-button click, outside-click (`e.target === overlay`), and Escape key, and — for embedded media — stop playback on close by clearing the `iframe.src` (storing the real URL in a `data-src` attribute).
+## Code style
+
+- Python: PEP 8, snake_case for all variables and functions
+- Templates: Jinja2 with `url_for()` for every internal link — never hardcode URLs
+- Route functions: one responsibility only — fetch data, render template, done
+- DB queries: always use parameterized queries (`?` placeholders) — never f-strings in SQL
+- Error handling: use `abort()` for HTTP errors, not bare `return "error string"`
+
+---
+
+## Tech constraints
+
+- **Flask only** — no FastAPI, no Django, no other web frameworks
+- **SQLite only** — no PostgreSQL, no SQLAlchemy ORM, no external DB
+- **Vanilla JS only** — no React, no jQuery, no npm packages
+- **No new pip packages** — work within `requirements.txt` as-is unless explicitly told otherwise
+- Python 3.10+ assumed — f-strings and `match` statements are fine
+
+---
+
+## Subagent Policy
+- Always use a builtin explore subagent for codebase exploration 
+  before implementing any new feature
+- Always use a subagent to verify test results 
+  after any implementation
+- When asked to plan, delegate codebase research 
+  to a subagent before presenting the plan
+- always use a builtin plan subagent in plan mode
+
+---
+
+## Commands
+```bash
+# Setup
+python -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Run dev server (port 5001)
+python app.py
+
+# Run all tests
+pytest
+
+# Run a specific test file
+pytest tests/test_foo.py
+
+# Run a specific test by name
+pytest -k "test_name"
+
+# Run tests with output visible
+pytest -s
+```
+
+---
+
+## Implemented vs stub routes
+
+| Route | Status |
+|---|---|
+| `GET /` | Implemented — renders `landing.html` |
+| `GET /register` | Implemented — renders `register.html` |
+| `GET /login` | Implemented — renders `login.html` |
+| `GET /logout` | Stub — Step 3 |
+| `GET /profile` | Stub — Step 4 |
+| `GET /expenses/add` | Stub — Step 7 |
+| `GET /expenses/<id>/edit` | Stub — Step 8 |
+| `GET /expenses/<id>/delete` | Stub — Step 9 |
+
+**Do not implement a stub route unless the active task explicitly targets that step.**
+
+---
+
+## Warnings and things to avoid
+
+- **Never use raw string returns for stub routes** once a step is implemented — always render a template
+- **Never hardcode URLs** in templates — always use `url_for()`
+- **Never put DB logic in route functions** — it belongs in `database/db.py`
+- **Never install new packages** mid-feature without flagging it — keep `requirements.txt` in sync
+- **Never use JS frameworks** — the frontend is intentionally vanilla
+- **`database/db.py` is currently empty** — do not assume helpers exist until the step that implements them
+- **FK enforcement is manual** — SQLite foreign keys are off by default; `get_db()` must run `PRAGMA foreign_keys = ON` on every connection
+- The app runs on **port 5001**, not the Flask default 5000 — don't change this
