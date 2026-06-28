@@ -23,8 +23,13 @@ flow must exist before any of those steps are built.
 - `GET /login` — render the empty sign-in form — **public**
   (already implemented; unchanged behaviour).
 - `POST /login` — validate credentials, start a session on success and redirect
-  to the profile page, or re-render the form with an error on failure —
+  to the landing page (`/`), or re-render the form with an error on failure —
   **public** (new behaviour added to the existing `login` view function).
+  While a user is already logged in, both `GET` and `POST /login` redirect to
+  the landing page instead of showing the form.
+- `GET/POST /register` — while a user is already logged in, redirect to the
+  landing page instead of showing the registration form — **public** (guard
+  added to the existing `register` view).
 - `GET /logout` — clear the session and redirect to the landing page —
   **logged-in** (replaces the current Step 3 placeholder string).
 
@@ -65,7 +70,11 @@ operation, so no new `database/db.py` function is required).
   - Update the `login` view to handle `GET` and `POST`: read email/password,
     look up the user via `get_user_by_email()`, verify the password hash, set
     `session["user_id"]` (and `session["user_name"]`) on success and redirect
-    to the profile route, or re-render `login.html` with an `error` on failure.
+    to the landing route (`/`), or re-render `login.html` with an `error` on
+    failure. If a logged-in user hits `login`, redirect them to the landing
+    page before processing the form.
+  - Add the same already-logged-in guard to the `register` view: redirect a
+    logged-in user to the landing page instead of rendering the form.
   - Replace the placeholder `logout` view body with logic that clears the
     session (`session.clear()`) and redirects to `landing`.
 - `templates/login.html` — replace the hardcoded action with `url_for()` and
@@ -99,8 +108,10 @@ No new dependencies. Flask sessions are built in (`flask.session`), and
 ## Definition of done
 - [ ] `GET /login` still renders the sign-in form with no errors and its form
       action uses `url_for('login')` (no hardcoded URL).
-- [ ] Submitting a valid email + correct password redirects to the profile
-      route and populates the session (`session["user_id"]` is set).
+- [ ] Submitting a valid email + correct password redirects to the landing
+      page (`/`) and populates the session (`session["user_id"]` is set).
+- [ ] A logged-in user visiting `/login` or `/register` is redirected to the
+      landing page instead of seeing the form.
 - [ ] After logging in, the navbar shows a **Logout** link instead of the
       Sign in / Get started links.
 - [ ] Submitting a wrong password re-renders `login.html` with an
