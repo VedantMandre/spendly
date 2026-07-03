@@ -62,13 +62,17 @@
             {% set max_total = breakdown[0]["total"] %}
             <div class="profile-cat-list">
                 {% for c in breakdown %}
+                {% set cat_class = 'profile-cat-' ~ c['category']|lower %}
                 <div class="profile-cat-row">
                     <div class="profile-cat-head">
-                        <span class="profile-cat-name">{{ c["category"] }}</span>
+                        <span class="profile-cat-label">
+                            <span class="profile-cat-dot {{ cat_class }}"></span>
+                            <span class="profile-cat-name">{{ c["category"] }}</span>
+                        </span>
                         <span class="profile-cat-amt">&#8377;{{ '%.2f'|format(c["total"]) }}</span>
                     </div>
                     <div class="profile-cat-track">
-                        <div class="profile-cat-fill"
+                        <div class="profile-cat-fill {{ cat_class }}"
                              style="width: {{ (c['total'] / max_total * 100)|round(1) }}%"></div>
                     </div>
                 </div>
