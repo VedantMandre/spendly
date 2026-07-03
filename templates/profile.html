@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Profile — Spendly{% endblock %}
+
+{% block content %}
+
+<div class="profile-page">
+
+    <div class="auth-header">
+        <h1 class="auth-title">{{ user["name"] }}</h1>
+        <p class="auth-subtitle">{{ user["email"] }}</p>
+        <p class="profile-meta">Member since {{ user["created_at"][:10] }}</p>
+    </div>
+
+    <div class="lp-stats">
+        <div class="lp-stat-card">
+            <span class="lp-stat-label">Total spent</span>
+            <span class="lp-stat-value">&#8377;{{ '%.2f'|format(summary["total"]) }}</span>
+            <span class="lp-stat-sub">across all expenses</span>
+        </div>
+        <div class="lp-stat-card">
+            <span class="lp-stat-label">Transactions</span>
+            <span class="lp-stat-value">{{ summary["count"] }}</span>
+            <span class="lp-stat-sub">total entries</span>
+        </div>
+        <div class="lp-stat-card">
+            <span class="lp-stat-label">Top category</span>
+            {% if top_category %}
+            <span class="lp-stat-value">{{ top_category["category"] }}</span>
+            <span class="lp-stat-sub">&#8377;{{ '%.2f'|format(top_category["total"]) }}</span>
+            {% else %}
+            <span class="lp-stat-value">&mdash;</span>
+            <span class="lp-stat-sub">no expenses yet</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="profile-grid">
+
+        <div class="profile-card">
+            <h2 class="profile-section-title">Recent transactions</h2>
+            {% if recent %}
+            <ul class="profile-tx-list">
+                {% for e in recent %}
+                <li class="profile-tx-row">
+                    <span class="profile-tx-main">
+                        <span class="profile-tx-desc">{{ e["description"] or e["category"] }}</span>
+                        <span class="profile-tx-meta">{{ e["category"] }} &middot; {{ e["date"][:10] }}</span>
+                    </span>
+                    <span class="profile-tx-amt">&#8377;{{ '%.2f'|format(e["amount"]) }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="profile-empty">No transactions yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="profile-card">
+            <h2 class="profile-section-title">Expenses by category</h2>
+            {% if breakdown %}
+            {% set max_total = breakdown[0]["total"] %}
+            <div class="profile-cat-list">
+                {% for c in breakdown %}
+                <div class="profile-cat-row">
+                    <div class="profile-cat-head">
+                        <span class="profile-cat-name">{{ c["category"] }}</span>
+                        <span class="profile-cat-amt">&#8377;{{ '%.2f'|format(c["total"]) }}</span>
+                    </div>
+                    <div class="profile-cat-track">
+                        <div class="profile-cat-fill"
+                             style="width: {{ (c['total'] / max_total * 100)|round(1) }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="profile-empty">No expenses to break down yet.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
