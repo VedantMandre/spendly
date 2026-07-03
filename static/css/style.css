@@ -19,6 +19,15 @@
     --border: #e4e1da;
     --border-soft: #eeebe4;
 
+    /* Category palette — reuses core accents, adds a few harmonised tones */
+    --cat-food: var(--accent);
+    --cat-transport: #2c6e8f;
+    --cat-bills: var(--accent-2);
+    --cat-health: var(--danger);
+    --cat-entertainment: #7a5aa0;
+    --cat-shopping: #2f8f7f;
+    --cat-other: #9a8f7d;
+
     --font-display: 'DM Serif Display', Georgia, serif;
     --font-body: 'DM Sans', system-ui, sans-serif;
 
@@ -754,6 +763,25 @@ a { color: inherit; text-decoration: none; }
     padding: 1.5rem;
 }
 
+/* Subtle lift on hover for cards and stat tiles */
+.profile-card,
+.profile-page .lp-stat-card {
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.profile-card:hover,
+.profile-page .lp-stat-card:hover {
+    border-color: var(--ink-faint);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Tabular figures so amounts align vertically */
+.profile-page .lp-stat-value,
+.profile-tx-amt,
+.profile-cat-amt {
+    font-variant-numeric: tabular-nums;
+}
+
 .profile-section-title {
     font-family: var(--font-body);
     font-size: 0.95rem;
@@ -781,11 +809,16 @@ a { color: inherit; text-decoration: none; }
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0.7rem 0;
+    padding: 0.7rem 0.6rem;
+    margin: 0 -0.6rem;
+    border-radius: var(--radius-sm);
     border-bottom: 1px solid var(--border-soft);
+    transition: background 0.15s ease;
 }
 
 .profile-tx-row:last-child { border-bottom: none; }
+
+.profile-tx-row:hover { background: var(--paper-warm); }
 
 .profile-tx-main {
     display: flex;
@@ -851,6 +884,30 @@ a { color: inherit; text-decoration: none; }
     background: var(--accent);
     border-radius: 999px;
 }
+
+.profile-cat-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+.profile-cat-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+}
+
+/* Per-category colours (applied to both the dot and the bar fill) */
+.profile-cat-food          { background: var(--cat-food); }
+.profile-cat-transport     { background: var(--cat-transport); }
+.profile-cat-bills         { background: var(--cat-bills); }
+.profile-cat-health        { background: var(--cat-health); }
+.profile-cat-entertainment { background: var(--cat-entertainment); }
+.profile-cat-shopping      { background: var(--cat-shopping); }
+.profile-cat-other         { background: var(--cat-other); }
 
 @media (max-width: 700px) {
     .profile-grid { grid-template-columns: 1fr; }
