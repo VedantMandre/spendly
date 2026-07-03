@@ -6,8 +6,12 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from database.db import (
     create_user,
+    get_category_breakdown,
     get_db,
+    get_expense_summary,
+    get_recent_expenses,
     get_user_by_email,
+    get_user_by_id,
     init_db,
     seed_db,
 )
@@ -82,7 +86,7 @@ def login():
 
     session["user_id"] = user["id"]
     session["user_name"] = user["name"]
-    return redirect(url_for("landing"))
+    return redirect(url_for("profile"))
 
 
 @app.route("/terms")
@@ -107,7 +111,28 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    return "Profile page — coming in Step 4"
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("login"))
+
+    user = get_user_by_id(user_id)
+    if user is None:
+        # Stale session (user row gone, e.g. DB reset) — clear and re-login.
+        session.clear()
+        return redirect(url_for("login"))
+
+    summary = get_expense_summary(user_id)
+    recent = get_recent_expenses(user_id)
+    breakdown = get_category_breakdown(user_id)
+    top_category = breakdown[0] if breakdown else None
+    return render_template(
+        "profile.html",
+        user=user,
+        summary=summary,
+        recent=recent,
+        breakdown=breakdown,
+        top_category=top_category,
+    )
 
 
 @app.route("/expenses/add")
